@@ -29,7 +29,7 @@ struct ContentView: View {
                         onEdit: {
                             planToEdit = plan
                             editedTitle = plan.title
-                            editedDueDate = plan.dueDate ?? Date() // 🔧
+                            editedDueDate = plan.dueDate ?? Date()
                         },
                         onToggleComplete: {
                             plan.isDone.toggle()
@@ -43,7 +43,7 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         newTitle = ""
-                        newDueDate = Date() // 🔧
+                        newDueDate = Date()
                         isAddAlertShowing.toggle()
                     } label: {
                         Image(systemName: "plus")
@@ -68,7 +68,7 @@ struct ContentView: View {
                             Button("Save") {
                                 let trimmed = newTitle.trimmingCharacters(in: .whitespaces)
                                 guard !trimmed.isEmpty else { return }
-                                modelContext.insert(Plan(title: trimmed, dueDate: newDueDate)) // 🔧
+                                modelContext.insert(Plan(title: trimmed, dueDate: newDueDate))
                                 newTitle = ""
                                 simpleHaptic()
                                 isAddAlertShowing = false
@@ -82,7 +82,6 @@ struct ContentView: View {
                 }
             }
             
-            // 🔧 Edit qilish uchun sheet
             .sheet(item: $planToEdit) { plan in
                 NavigationStack {
                     Form {
