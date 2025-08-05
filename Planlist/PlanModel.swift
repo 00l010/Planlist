@@ -6,7 +6,7 @@ import SwiftData
 class Plan {
   var title: String
   var isDone: Bool
-  var dueDate: Date?
+  var dueDate: Date?           
   var priority: Priority
   var category: String
 

@@ -17,11 +17,19 @@ struct PlanRowView: View {
             }
             .buttonStyle(.plain)
             
-            Text(plan.title)
-                .strikethrough(plan.isDone)
-                .foregroundStyle(plan.isDone ? .secondary : .primary)
-                .animation(.easeInOut, value: plan.isDone)
-                .padding(.leading, 5)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(plan.title)
+                    .strikethrough(plan.isDone)
+                    .foregroundStyle(plan.isDone ? .secondary : .primary)
+                    .animation(.easeInOut, value: plan.isDone)
+                
+                if let dueDate = plan.dueDate {
+                    Text("Due: \(dueDate.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.leading, 5)
             
             Spacer()
         }

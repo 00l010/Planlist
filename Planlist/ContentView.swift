@@ -1,3 +1,4 @@
+
 import SwiftUI
 import SwiftData
 
@@ -10,6 +11,10 @@ struct ContentView: View {
     
     @State private var planToEdit: Plan?
     @State private var editedTitle: String = ""
+    
+    @State private var newDueDate: Date = Date()
+    @State private var editedDueDate: Date = Date()
+    @State private var isEditingDueDate: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -24,6 +29,7 @@ struct ContentView: View {
                         onEdit: {
                             planToEdit = plan
                             editedTitle = plan.title
+                            editedDueDate = plan.dueDate ?? Date() // 🔧
                         },
                         onToggleComplete: {
                             plan.isDone.toggle()
@@ -36,6 +42,8 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        newTitle = ""
+                        newDueDate = Date() // 🔧
                         isAddAlertShowing.toggle()
                     } label: {
                         Image(systemName: "plus")
@@ -48,33 +56,56 @@ struct ContentView: View {
                     }
                 }
             }
-            .alert("Create a new plan", isPresented: $isAddAlertShowing) {
-                TextField("Enter a plan", text: $newTitle)
-                Button("Save") {
-                    let trimmed = newTitle.trimmingCharacters(in: .whitespaces)
-                    guard !trimmed.isEmpty else { return }
-                    modelContext.insert(Plan(title: trimmed))
-                    newTitle = ""
-                    simpleHaptic()
-                }
-                Button("Cancel", role: .cancel) { }
-            }
-            .alert("Edit Plan", isPresented: Binding<Bool>(
-                get: { planToEdit != nil },
-                set: { if !$0 { planToEdit = nil } }
-            )) {
-                TextField("Edit plan", text: $editedTitle)
-                Button("Save") {
-                    if let plan = planToEdit {
-                        plan.title = editedTitle
-                        simpleHaptic()
+
+            .sheet(isPresented: $isAddAlertShowing) {
+                NavigationStack {
+                    Form {
+                        Section("Plan Details") {
+                            TextField("Enter a plan", text: $newTitle)
+                            DatePicker("Due Date", selection: $newDueDate, displayedComponents: .date)
+                        }
+                        Section {
+                            Button("Save") {
+                                let trimmed = newTitle.trimmingCharacters(in: .whitespaces)
+                                guard !trimmed.isEmpty else { return }
+                                modelContext.insert(Plan(title: trimmed, dueDate: newDueDate)) // 🔧
+                                newTitle = ""
+                                simpleHaptic()
+                                isAddAlertShowing = false
+                            }
+                            Button("Cancel", role: .cancel) {
+                                isAddAlertShowing = false
+                            }
+                        }
                     }
-                    planToEdit = nil
-                }
-                Button("Cancel", role: .cancel) {
-                    planToEdit = nil
+                    .navigationTitle("New Plan")
                 }
             }
+            
+            // 🔧 Edit qilish uchun sheet
+            .sheet(item: $planToEdit) { plan in
+                NavigationStack {
+                    Form {
+                        Section("Edit Plan") {
+                            TextField("Plan Title", text: $editedTitle)
+                            DatePicker("Due Date", selection: $editedDueDate, displayedComponents: .date)
+                        }
+                        Section {
+                            Button("Save") {
+                                plan.title = editedTitle
+                                plan.dueDate = editedDueDate
+                                planToEdit = nil
+                                simpleHaptic()
+                            }
+                            Button("Cancel", role: .cancel) {
+                                planToEdit = nil
+                            }
+                        }
+                    }
+                    .navigationTitle("Edit Plan")
+                }
+            }
+            
             .overlay {
                 if plans.isEmpty {
                     ContentUnavailableView("My Plan List", systemImage: "calendar", description: Text("No plans yet. Add one to get started."))
@@ -82,12 +113,13 @@ struct ContentView: View {
             }
         }
     }
-    
+
     private func simpleHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
     }
 }
+
 
 
 #Preview("List with Sample Data") {
