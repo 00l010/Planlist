@@ -10,7 +10,8 @@
 - Organize tasks by category  
 - Assign priority levels: High, Medium, Low  
 - Haptic feedback for key interactions  
-- Dark mode support based on system appearance  
+- Dark mode support based on system appearance
+- Search plans by title  
 
 ## Technologies Used
 
